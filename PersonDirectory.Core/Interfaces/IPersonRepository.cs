@@ -13,6 +13,6 @@ namespace PersonDirectory.Core.Repositories
         Task DeleteRelatedPerson(int personId, int relatedPersonID);
         Task DeletePerson(int personId);
         Task<Person> GetPerson(int personId);
-        Task<IEnumerable<Person>> GetPersons(string searchString, int pageIndex, int pageSize, bool fastSearch);
+        Task<IEnumerable<Person>> GetPersons(string searchString, int pageIndex, int pageSize, bool fastSearch, bool useSqlFunction);
     }
 }

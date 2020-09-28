@@ -62,18 +62,16 @@ namespace PersonDirectory.Core.Repositories
 
         public async Task<Person> GetPerson(int personId) => await Task.FromResult(GetPersons().FirstOrDefault(x => x.ID == personId));
 
-
-        public async Task<IEnumerable<Person>> GetPersons(string searchString, int pageIndex, int pageSize, bool fastSearch)
+        public async Task<IEnumerable<Person>> GetPersons(string searchString, int pageIndex, int pageSize, bool fastSearch, bool useSqlFunction = false)
         {
             var splitedSearchString = searchString.Split(' ').Where(x => !string.IsNullOrWhiteSpace(x));
 
             if (fastSearch)
             {
-                //TODO ეს კარგად არ მუშაობს, დაკავშირებულ პირებს არ აბრუნებს
-                //if (useSqlFunction)
-                //    return _context.Persons.FromSqlRaw($"select * from FindPerson(N'{searchString}',{pageIndex},{pageSize})").Include(x => x.RelatedPersons).Include(x => x.TelNumbers);
+                if (useSqlFunction)
+                    return _context.Persons.FromSqlRaw($"select * from FindPerson(N'{searchString}',{pageIndex},{pageSize})").Include(x => x.RelatedPersons).ThenInclude(x => x.RelatedPerson).Include(x => x.TelNumbers);
 
-                return await Task.FromResult(GetPersons().Where(x => splitedSearchString.Any(a => $"{x.Firstname}_{x.Lastname}_{x.IDNumber}".ToLower().Contains(a.ToLower()))).Skip((pageIndex - 1) * pageSize).Take(pageSize).ToArray());
+                return await Task.FromResult(GetPersons().Where(x => splitedSearchString.Any(a => $"{x.Firstname}_{x.Lastname}_{x.IDNumber}".ToLower().Contains(a.ToLower()))).Skip((pageIndex - 1) * pageSize).Take(pageSize));
             }
 
             return await Task.FromResult(GetPersons()
